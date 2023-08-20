@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.VarChar(36)
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  favorites Car[]     @relation("FavoriteCars", references: [id])
+  listings  Car[]     @relation("CreatedByUser")
+//  favoriteCars     Car[]     @relation("FavoriteCars", references: [id])
+//   createdListings  Car[]     @relation("ListingsByUser")
+  accounts  Account[]
+  
+}
+
+model Account {
+  id                 String    @id @default(uuid()) @db.VarChar(36)
+  userId            Int     @db.Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+
+  @@unique([provider, providerAccountId])
+}
+
+model CarMake {
+  id     Int        @id @default(autoincrement())
+  name   String     @unique
+  models CarModel[]
+}
+
+model CarModel {
+  id        Int     @id @default(autoincrement())
+  name      String
+  carMake   CarMake @relation(fields: [carMakeId], references: [id])
+  carMakeId Int
+  cars      Car[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  Car      Car[]
+}
+
+enum VehicleType {
+  CAR
+  MOTORCYCLE
+  TRUCK
+}
+
+model Car {
+  id           Int    @id @default(autoincrement())
+  make         String
+  model        String
+  imageUrl     String
+  description  String
+  year         Int
+  horsePower   Int
+  color        String
+  Transmission String
+  Engine       String
+  Condition    String
+  Euro         Int
+  distance     Int
+  location     String
+  price        Int
+  vehicleType   VehicleType
+  // userId       Int
+
+ owner    User      @relation("CreatedByUser", fields: [ownerId], references: [id])
+  ownerId  Int
+
+
+  carModel   CarModel @relation(fields: [carModelId], references: [id])
+  carModelId Int
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+}
+
+
+
+
+// model Favorite {
+//   id     Int @id @default(autoincrement())
+//   userId Int
+//   carId  Int
+
+//   user User @relation(fields: [userId], references: [id])
+//   car  Car  @relation(fields: [carId], references: [id])
+
+//   createdAt DateTime @default(now())
+// }
+
+// enum RoleType {
+//   USER
+//   ADMIN
+// }
+
+
+// enum SortingOption {
+//   LOWEST_PRICE
+//   HIGHEST_PRICE
+//   MAKE
+//   MODEL
+//   YEAR
+//   NEWEST
+// }
+
+//idea extras for cars like the ones you click below the car search filter
